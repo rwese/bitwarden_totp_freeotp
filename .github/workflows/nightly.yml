@@ -41,6 +41,6 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         github_token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-        tag_name: nightly-${{ env.GITHUB_SHA }}
+        tag_name: nightly
         release_name: Nightly Build ${{ env.GITHUB_SHA }}
         files: bin/extract_bitwarden_totp-darwin-amd64,bin/extract_bitwarden_totp-linux-amd64,bin/extract_bitwarden_totp-windows-amd64.exe
