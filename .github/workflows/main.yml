@@ -3,30 +3,36 @@ name: Build and Release
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
 
 env:
-  GITHUB_TOKEN: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+  GO111MODULE: on
+  TAG_NAME: ${{ env.TAG_NAME }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Build binary
-        run: |
-          make build
+    - name: Setup Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: latest
 
-      - name: Create release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: bin/extract_bitwarden_totp
-          tag_name: ${{ env.TAG_NAME }}
-          release_name: ${{ env.TAG_NAME }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+    - name: Build for amd64
+      run: |
+        GOOS=linux GOARCH=amd64 go build -o bin/extract_bitwarden_totp_linux_amd64 cmd/cli/cli.go
+
+    - name: Build for arm64
+      run: |
+        GOOS=linux GOARCH=arm64 go build -o bin/extract_bitwarden_totp_linux_arm64 cmd/cli/cli.go
+
+    - name: Create release
+      uses: softprops/action-gh-release@v1
+      with:
+        github_token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+        assets: bin/extract_bitwarden_totp_linux_amd64,bin/extract_bitwarden_totp_linux_arm64
+        release_name: v${{ env.TAG_NAME }}
