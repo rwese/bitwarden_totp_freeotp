@@ -6,33 +6,37 @@ on:
       - 'v*'
 
 env:
-  GO111MODULE: on
   TAG_NAME: ${{ env.TAG_NAME }}
+  GO111MODULE: on
+  GO_VERSION: ">=1.17.0"
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+  
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Setup Go
-      uses: actions/setup-go@v2
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - name: Set up Go
+      uses: actions/setup-go@v3
       with:
-        go-version: latest
-
-    - name: Build for amd64
+        go-version: ${{ env.GO_VERSION }}
+        
+    - name: Build for macOS
       run: |
-        GOOS=linux GOARCH=amd64 go build -o bin/extract_bitwarden_totp_linux_amd64 cmd/cli/cli.go
+        GOOS=darwin GOARCH=amd64 go build -o bin/extract_bitwarden_totp-darwin-amd64 ./cmd/cli
 
-    - name: Build for arm64
+    - name: Build for Linux
       run: |
-        GOOS=linux GOARCH=arm64 go build -o bin/extract_bitwarden_totp_linux_arm64 cmd/cli/cli.go
+        GOOS=linux GOARCH=amd64 go build -o bin/extract_bitwarden_totp-linux-amd64 ./cmd/cli
+
+    - name: Build for Windows
+      run: |
+        GOOS=windows GOARCH=amd64 go build -o bin/extract_bitwarden_totp-windows-amd64.exe ./cmd/cli
 
     - name: Create release
       uses: softprops/action-gh-release@v1
       with:
         github_token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-        assets: bin/extract_bitwarden_totp_linux_amd64,bin/extract_bitwarden_totp_linux_arm64
-        release_name: v${{ env.TAG_NAME }}
+        files: bin/extract_bitwarden_totp-darwin-amd64,bin/extract_bitwarden_totp-linux-amd64,bin/extract_bitwarden_totp-windows-amd64.exe        release_name: v${{ env.TAG_NAME }}
