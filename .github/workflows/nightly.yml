@@ -6,8 +6,6 @@ on:
       - main
 
 env:
-  GOBIN: /usr/local/bin
-  GOPATH: ${{ env.GOBIN }}
   GO111MODULE: on
   GO_VERSION: ">=1.17.0"
 
