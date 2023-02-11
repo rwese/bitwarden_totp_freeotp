@@ -30,7 +30,7 @@ jobs:
         GOARCH=arm64 GOOS=linux go build -ldflags="-s -w" -o bin/extract_bitwarden_totp-linux-arm64 cmd/cli/cli.go
 
     - name: Create Release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v1
       with:
         files: bin/extract_bitwarden_totp-linux-amd64,bin/extract_bitwarden_totp-linux-arm64
         github_token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
