@@ -1,35 +1,45 @@
-name: Nightly Build
+name: Nightly Build and Release
 
 on:
   push:
     branches:
       - main
 
+env:
+  GOBIN: /usr/local/bin
+  GOPATH: ${{ env.GOBIN }}
+  GO111MODULE: on
+  GO_VERSION: ">=1.17.0"
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
+    - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Setup Go
+    - name: Set up Go
       uses: actions/setup-go@v2
       with:
-        go-version: '>=1.17.0'
+        go-version: ${{ env.GO_VERSION }}
 
-    - name: Build for multiple architectures
+    - name: Build for macOS
       run: |
-        GOOS=linux GOARCH=amd64 go build -o extract_bitwarden_totp_linux_amd64
-        GOOS=linux GOARCH=arm64 go build -o extract_bitwarden_totp_linux_arm64
-        GOOS=darwin GOARCH=amd64 go build -o extract_bitwarden_totp_darwin_amd64
+        GOOS=darwin GOARCH=amd64 go build -o bin/extract_bitwarden_totp-darwin-amd64
+
+    - name: Build for Linux
+      run: |
+        GOOS=linux GOARCH=amd64 go build -o bin/extract_bitwarden_totp-linux-amd64
+
+    - name: Build for Windows
+      run: |
+        GOOS=windows GOARCH=amd64 go build -o bin/extract_bitwarden_totp-windows-amd64.exe
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          extract_bitwarden_totp_linux_amd64
-          extract_bitwarden_totp_linux_arm64
-          extract_bitwarden_totp_darwin_amd64
         github_token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
-        release_name: Nightly Build - ${{ env.GITHUB_SHA }}
+        tag_name: nightly-${{ env.GITHUB_SHA }}
+        release_name: Nightly Build ${{ env.GITHUB_SHA }}
+        files: bin/extract_bitwarden_totp-darwin-amd64,bin/extract_bitwarden_totp-linux-amd64,bin/extract_bitwarden_totp-windows-amd64.exe
